@@ -1,0 +1,9 @@
+.workspace-leaf-content .view-content.tc-host { position: relative; padding: 0 !important; overflow: hidden !important; background: #03040c; }
+.tc-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+.tc-canvas:active { cursor: grabbing; }
+.tc-count { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: rgba(220,228,255,.45); pointer-events: none; }
+.tc-error { position: absolute; inset: 30% 10% auto; color: #ffd0d0; font-size: 15px; text-align: center; }
+.tc-names { position: absolute; right: 12px; top: 10px; font-size: 12px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  background: rgba(20, 26, 50, .6); color: rgba(220, 228, 255, .7); border: 1px solid rgba(160, 190, 255, .25); box-shadow: none; }
+.tc-names:hover { color: #fff; background: rgba(40, 50, 90, .7); }
+.tc-host:focus { outline: none; }
