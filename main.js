@@ -1,7 +1,7 @@
 // Solara's Stars: your Obsidian vault as a slowly turning cluster of stars.
 // Notes are stars, links are faint threads of light, well-linked notes shine brighter.
 // Drag to turn, scroll to zoom, hover for a name, click to open the note.
-const { Plugin, ItemView, PluginSettingTab, Setting, getAllTags } = require('obsidian');
+const { Plugin, ItemView, PluginSettingTab, Setting, getAllTags, normalizePath } = require('obsidian');
 
 const VIEW = 'solaras-stars';
 const DEFAULTS = { colors: 'graph', useGraphFilter: true, exclude: '', showUnresolved: true, spin: 1, labels: 10, hideNames: false };
@@ -32,7 +32,8 @@ const queryMatches = (groups, f) => groups.some(terms => terms.every(t => termMa
 const toRGB = n => [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 
 async function graphConfig(app) {
-  try { return JSON.parse(await app.vault.adapter.read(app.vault.configDir + '/graph.json')); } catch (e) { return {}; }
+  // graph.json lives in the config folder, which the Vault API does not index, so it is read through the adapter.
+  try { return JSON.parse(await app.vault.adapter.read(normalizePath(app.vault.configDir + '/graph.json'))); } catch (e) { return {}; }
 }
 
 // ---- the star graph ----
@@ -182,7 +183,7 @@ function createConstellation(host, graph, opts = {}) {
     let best = -1, bd = 14 * 14;
     nodes.forEach((n, i) => { if (n.sx == null) return; const d = (n.sx - mx) ** 2 + (n.sy - my) ** 2; if (d < bd) { bd = d; best = i; } });
     hover = best;
-    canvas.style.cursor = best >= 0 && !nodes[best].idea ? 'pointer' : 'grab';
+    canvas.classList.toggle('is-link', best >= 0 && !nodes[best].idea);
   });
   canvas.addEventListener('pointerleave', () => { hover = -1; });
   canvas.addEventListener('wheel', e => { e.preventDefault(); dist = Math.max(180, Math.min(6000, dist * (1 + Math.sign(e.deltaY) * 0.08))); }, { passive: false });
@@ -363,8 +364,8 @@ class ConstellationPlugin extends Plugin {
   async onload() {
     this.settings = Object.assign({}, DEFAULTS, await this.loadData());
     this.registerView(VIEW, leaf => new ConstellationView(leaf, this));
-    this.addRibbonIcon('sparkles', "Open Solara's Stars", () => this.open());
-    this.addCommand({ id: 'open', name: "Open Solara's Stars", callback: () => this.open() });
+    this.addRibbonIcon('sparkles', 'Open star map', () => this.open());
+    this.addCommand({ id: 'open', name: 'Open star map', callback: () => this.open() });
     this.addSettingTab(new ConstellationSettings(this.app, this));
   }
   views() { return this.app.workspace.getLeavesOfType(VIEW).map(l => l.view).filter(v => v instanceof ConstellationView); }
@@ -384,7 +385,7 @@ class ConstellationPlugin extends Plugin {
     const existing = this.app.workspace.getLeavesOfType(VIEW);
     const leaf = existing[0] || this.app.workspace.getLeaf('tab');
     await leaf.setViewState({ type: VIEW, active: true });
-    this.app.workspace.revealLeaf(leaf);
+    await this.app.workspace.revealLeaf(leaf);
   }
   onunload() { clearTimeout(this.redrawTimer); this.views().forEach(v => v.sky && v.sky.destroy()); }
 }

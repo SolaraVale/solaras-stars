@@ -24,7 +24,7 @@ Until it's in Obsidian's community plugin list:
 2. In your vault, open the hidden `.obsidian/plugins` folder and make a new folder inside it named `solaras-stars`.
 3. Put the three files in that folder.
 4. In Obsidian, go to **Settings → Community plugins**, turn on community plugins if asked, and switch on **Solara's Stars**.
-5. Click the ✨ icon in the left ribbon (or run **Open Solara's Stars** from the command palette).
+5. Click the ✨ icon in the left ribbon (or run **Solara's Stars: Open star map** from the command palette).
 
 ## Settings
 
