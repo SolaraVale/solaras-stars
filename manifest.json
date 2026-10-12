@@ -1,7 +1,7 @@
 {
   "id": "solaras-stars",
   "name": "Solara's Stars",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "1.4.0",
   "description": "See your vault as a slowly turning 3D cluster of stars. Notes are stars, links are threads of light.",
   "author": "SolaraVale",

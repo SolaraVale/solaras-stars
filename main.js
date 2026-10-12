@@ -291,18 +291,21 @@ class ConstellationView extends ItemView {
     this.registerDomEvent(this.contentEl, 'keydown', e => {   // H hides or shows the names
       if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey) this.plugin.setHideNames(!this.plugin.settings.hideNames);
     });
-    // wait until the view has its size, then draw
-    requestAnimationFrame(() => requestAnimationFrame(() => this.draw()));
-    // Redraw only when the vault really changed (new notes or links), at most every 30 seconds.
-    let timer = null;
+    // Wait until the workspace is ready and the view has its size, then draw.
+    this.app.workspace.onLayoutReady(() => requestAnimationFrame(() => requestAnimationFrame(() => this.draw())));
+    // When Obsidian starts with this view open, it draws before every note and link has been read.
+    // The first "resolved" (all links read) redraws right away; after that, at most every 30 seconds.
+    let timer = null, first = true;
+    const redrawIfChanged = async () => {
+      const g = await vaultGraph(this.app, this.plugin.settings);
+      if (g.nodes.length !== this.shape?.[0] || g.links.length !== this.shape?.[1]) this.draw(g);
+    };
     this.registerEvent(this.app.metadataCache.on('resolved', () => {
+      if (first) { first = false; redrawIfChanged(); return; }
       if (timer) return;
-      timer = setTimeout(async () => {
-        timer = null;
-        const g = await vaultGraph(this.app, this.plugin.settings);
-        if (g.nodes.length !== this.shape?.[0] || g.links.length !== this.shape?.[1]) this.draw(g);
-      }, 30000);
+      timer = window.setTimeout(() => { timer = null; redrawIfChanged(); }, 30000);
     }));
+    this.register(() => window.clearTimeout(timer));
   }
   async draw(graph) {
     const host = this.contentEl, s = this.plugin.settings;
